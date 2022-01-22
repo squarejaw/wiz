@@ -51,6 +51,6 @@ var onCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(onCmd)
-	onCmd.Flags().IntVarP(&temp, "kelvin", "k", 3000, "temperature in Kelvin")
+	onCmd.Flags().IntVarP(&temp, "kelvin", "k", 2700, "temperature in Kelvin")
 	onCmd.Flags().IntVarP(&dimming, "dimming", "d", 50, "dimming")
 }
