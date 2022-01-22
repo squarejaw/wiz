@@ -34,9 +34,9 @@ var offCmd = &cobra.Command{
 			return
 		}
 		cobra.CheckErr(err)
-		success := gjson.GetBytes(buf, "result.success").Bool()
-		if success {
-			fmt.Println("Success")
+		result := gjson.GetBytes(buf, "result")
+		if result.Get("success").Bool() {
+			fmt.Println(result)
 		} else {
 			errorMessage := gjson.GetBytes(buf, "error.message").String()
 			fmt.Println("Error: " + errorMessage)
