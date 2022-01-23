@@ -27,8 +27,8 @@ var onCmd = &cobra.Command{
 		}
 		ip := args[0]
 		b := bulb.Bulb{
-			IP: ip,
-			Params: bulb.Params{
+			IP: &ip,
+			Params: &bulb.Params{
 				Dimming: &dimming,
 			},
 		}

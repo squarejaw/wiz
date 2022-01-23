@@ -12,8 +12,9 @@ import (
 )
 
 type Bulb struct {
-	IP     string
-	Params Params
+	IP     *string `json:"ip,omitempty"`
+	Mac    *string `json:"mac,omitempty"`
+	Params *Params `json:"method,omitempty"`
 }
 
 type Params struct {
@@ -30,19 +31,19 @@ type Params struct {
 }
 
 type Message struct {
-	Method string `json:"method"`
-	Params Params `json:"params"`
+	Method *string `json:"method,omitempty"`
+	Params *Params `json:"params,omitempty"`
 }
 
 func (bulb *Bulb) SetState(timeout int) (string, error) {
-	udpSession, err := udp.NewSession(bulb.IP+":38899", time.Duration(timeout)*time.Second)
+	udpSession, err := udp.NewSession(*bulb.IP+":38899", time.Duration(timeout)*time.Second)
 	if err != nil {
 		return "", err
 	}
 	defer udpSession.Close()
-
+	method := "setState"
 	msg := Message{
-		Method: "setState",
+		Method: &method,
 		Params: bulb.Params,
 	}
 

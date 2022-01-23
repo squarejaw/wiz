@@ -18,8 +18,8 @@ var offCmd = &cobra.Command{
 		ip := args[0]
 		state := false
 		b := bulb.Bulb{
-			IP: ip,
-			Params: bulb.Params{
+			IP: &ip,
+			Params: &bulb.Params{
 				State: &state,
 			},
 		}
