@@ -32,22 +32,22 @@ var onCmd = &cobra.Command{
 				Dimming: &dimming,
 			},
 		}
-		if temp >= 1000 {
+		if cmd.Flag("temp").Changed {
 			b.Params.Temp = &temp
 		}
-		if red > 0 {
+		if cmd.Flag("red").Changed {
 			b.Params.Red = &red
 		}
-		if green > 0 {
+		if cmd.Flag("green").Changed {
 			b.Params.Green = &green
 		}
-		if blue > 0 {
+		if cmd.Flag("blue").Changed {
 			b.Params.Blue = &blue
 		}
-		if coldWhite > 0 {
+		if cmd.Flag("cold-white").Changed {
 			b.Params.ColdWhite = &coldWhite
 		}
-		if warmWhite > 0 {
+		if cmd.Flag("warm-white").Changed {
 			b.Params.WarmWhite = &warmWhite
 		}
 		result, err := b.SetState(timeout)
@@ -58,7 +58,8 @@ var onCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(onCmd)
-	onCmd.Flags().IntVarP(&temp, "kelvin", "k", 0, "temperature in Kelvin")
+	onCmd.Flags().SortFlags = false
+	onCmd.Flags().IntVarP(&temp, "temp", "k", 0, "temperature in Kelvin")
 	onCmd.Flags().IntVarP(&dimming, "dimming", "d", 50, "dimming")
 	onCmd.Flags().IntVarP(&red, "red", "r", 0, "red")
 	onCmd.Flags().IntVarP(&green, "green", "g", 0, "green")
