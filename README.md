@@ -8,6 +8,8 @@ Inspired by [pywizlight](https://github.com/sbidy/pywizlight).
 go install github.com/squarejaw/wiz@main
 ```
 
+Or download a binary [release](https://github.com/squarejaw/wiz/releases).
+
 ## Usage
 ```sh
 $ wiz list
