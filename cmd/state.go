@@ -1,7 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
@@ -15,7 +11,6 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// stateCmd represents the state command
 var stateCmd = &cobra.Command{
 	Use:   "state",
 	Short: "Get current bulb state",

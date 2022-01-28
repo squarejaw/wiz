@@ -26,6 +26,9 @@ var offCmd = &cobra.Command{
 		result, err := b.SetState(timeout)
 		cobra.CheckErr(err)
 		fmt.Println(result)
+		if result != "" {
+			fmt.Println(result)
+		}
 	},
 }
 
