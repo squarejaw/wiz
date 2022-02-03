@@ -14,8 +14,6 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-const BUFFER_SIZE = 1024
-
 var (
 	addr       string
 	outputJSON bool
@@ -49,8 +47,8 @@ func sendRegistration(udpSession udp.UDPSession) error {
 
 func printJSON(udpSession udp.UDPSession) error {
 	var bulbs []bulb.Bulb
+	buf := make([]byte, udp.MAX_SAFE_PAYLOAD_SIZE)
 	for {
-		buf := make([]byte, BUFFER_SIZE)
 		_, addr, err := udpSession.Read(buf)
 		if errors.Is(err, os.ErrDeadlineExceeded) {
 			b, err := json.Marshal(bulbs)
@@ -74,8 +72,8 @@ func printJSON(udpSession udp.UDPSession) error {
 
 func printPlain(udpSession udp.UDPSession) error {
 	fmt.Printf("%-16s%s\n", "IP", "MAC")
+	buf := make([]byte, udp.MAX_SAFE_PAYLOAD_SIZE)
 	for {
-		buf := make([]byte, BUFFER_SIZE)
 		_, addr, err := udpSession.Read(buf)
 		if errors.Is(err, os.ErrDeadlineExceeded) {
 			return nil

@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+// The maximum "safe" UDP payload is 508 bytes.
+// This is useful for buffer sizing.
+const MAX_SAFE_PAYLOAD_SIZE = 508
+
 type UDPSession struct {
 	conn   net.PacketConn
 	remote net.Addr

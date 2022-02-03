@@ -28,7 +28,7 @@ var stateCmd = &cobra.Command{
 		_, err = udpSession.Write(msg)
 		cobra.CheckErr(err)
 
-		buf := make([]byte, 1024)
+		buf := make([]byte, udp.MAX_SAFE_PAYLOAD_SIZE)
 		_, _, err = udpSession.Read(buf)
 		if errors.Is(err, os.ErrDeadlineExceeded) {
 			return
