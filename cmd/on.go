@@ -15,6 +15,8 @@ var (
 	blue      int
 	coldWhite int
 	warmWhite int
+	sceneID   int
+	speed     int
 )
 
 var onCmd = &cobra.Command{
@@ -30,6 +32,7 @@ var onCmd = &cobra.Command{
 			IP: &ip,
 			Params: &bulb.Params{
 				Dimming: &dimming,
+				Speed:   &speed,
 			},
 		}
 		if cmd.Flag("temp").Changed {
@@ -50,6 +53,9 @@ var onCmd = &cobra.Command{
 		if cmd.Flag("warm-white").Changed {
 			b.Params.WarmWhite = &warmWhite
 		}
+		if cmd.Flag("scene-id").Changed {
+			b.Params.SceneID = &sceneID
+		}
 		result, err := b.SetState(timeout)
 		cobra.CheckErr(err)
 		if result != "" {
@@ -68,4 +74,6 @@ func init() {
 	onCmd.Flags().IntVarP(&blue, "blue", "b", 0, "blue")
 	onCmd.Flags().IntVarP(&coldWhite, "cold-white", "c", 0, "cold white")
 	onCmd.Flags().IntVarP(&warmWhite, "warm-white", "w", 0, "warm white")
+	onCmd.Flags().IntVarP(&sceneID, "scene-id", "i", 0, "scene ID")
+	onCmd.Flags().IntVarP(&speed, "speed", "s", 50, "speed")
 }
