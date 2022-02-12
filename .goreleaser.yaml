@@ -8,3 +8,27 @@ builds:
     goarch:
       - amd64
       - arm64
+dockers:
+  - image_templates: 
+    - ghcr.io/squarejaw/wiz:latest-amd64
+    - ghcr.io/squarejaw/wiz:{{ .Version }}-amd64
+    goos: linux
+    goarch: amd64
+    build_flag_templates:
+    - "--platform=linux/amd64"
+  - image_templates:
+    - ghcr.io/squarejaw/wiz:latest-arm64v8
+    - ghcr.io/squarejaw/wiz:{{ .Version }}-arm64v8
+    goos: linux
+    goarch: arm64
+    build_flag_templates:
+    - "--platform=linux/arm64/v8"
+docker_manifests:
+- name_template: ghcr.io/squarejaw/wiz:latest
+  image_templates:
+  - ghcr.io/squarejaw/wiz:latest-amd64
+  - ghcr.io/squarejaw/wiz:latest-arm64v8
+- name_template: ghcr.io/squarejaw/wiz:{{ .Version }}
+  image_templates:
+  - ghcr.io/squarejaw/wiz:{{ .Version }}-amd64
+  - ghcr.io/squarejaw/wiz:{{ .Version }}-arm64v8
