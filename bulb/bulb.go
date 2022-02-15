@@ -36,7 +36,7 @@ type Message struct {
 }
 
 func (bulb *Bulb) SetState(timeout int) (string, error) {
-	udpSession, err := udp.NewSession(*bulb.IP+":38899", time.Duration(timeout)*time.Second)
+	udpSession, err := udp.NewSession(*bulb.IP, time.Duration(timeout)*time.Second)
 	if err != nil {
 		return "", err
 	}

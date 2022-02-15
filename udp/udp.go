@@ -1,6 +1,7 @@
 package udp
 
 import (
+	"fmt"
 	"net"
 	"time"
 )
@@ -9,18 +10,21 @@ import (
 // This is useful for buffer sizing.
 const MAX_SAFE_PAYLOAD_SIZE = 508
 
+// WiZ bulbs communicate on UDP port 38899
+const PORT = 38899
+
 type UDPSession struct {
 	conn   net.PacketConn
 	remote net.Addr
 }
 
-func NewSession(address string, timeout time.Duration) (*UDPSession, error) {
-	conn, err := net.ListenPacket("udp4", ":38899")
+func NewSession(ip string, timeout time.Duration) (*UDPSession, error) {
+	conn, err := net.ListenPacket("udp4", fmt.Sprintf(":%d", PORT))
 	if err != nil {
 		return nil, err
 	}
 	conn.SetReadDeadline(time.Now().Add(timeout))
-	remote, err := net.ResolveUDPAddr("udp4", address)
+	remote, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", ip, PORT))
 	if err != nil {
 		return nil, err
 	}

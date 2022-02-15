@@ -24,7 +24,7 @@ var listCmd = &cobra.Command{
 	Short: "List bulbs",
 	Long:  `Sends a UDP broadcast and lists bulbs that respond`,
 	Run: func(cmd *cobra.Command, args []string) {
-		udpSession, err := udp.NewSession(addr+":38899", time.Duration(timeout)*time.Second)
+		udpSession, err := udp.NewSession(addr, time.Duration(timeout)*time.Second)
 		cobra.CheckErr(err)
 		defer udpSession.Close()
 

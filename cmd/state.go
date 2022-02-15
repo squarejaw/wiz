@@ -20,7 +20,7 @@ var stateCmd = &cobra.Command{
 			cobra.CheckErr(fmt.Errorf("on needs an IP address of a bulb"))
 		}
 		ip := args[0]
-		udpSession, err := udp.NewSession(ip+":38899", time.Duration(timeout)*time.Second)
+		udpSession, err := udp.NewSession(ip, time.Duration(timeout)*time.Second)
 		cobra.CheckErr(err)
 		defer udpSession.Close()
 
