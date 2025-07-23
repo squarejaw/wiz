@@ -71,6 +71,6 @@ func (bulb *Bulb) SetState(timeout int) (string, error) {
 		return result.String(), nil
 	} else {
 		errorMessage := gjson.GetBytes(buf, "error.message").String()
-		return "", fmt.Errorf(errorMessage)
+		return "", fmt.Errorf("%s", errorMessage)
 	}
 }

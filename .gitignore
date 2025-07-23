@@ -1,0 +1,9 @@
+# Binary output
+wiz
+
+# Go build cache and modules
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
