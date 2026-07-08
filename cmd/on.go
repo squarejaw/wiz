@@ -23,38 +23,34 @@ var onCmd = &cobra.Command{
 	Use:   "on [IP]",
 	Short: "Turn bulb on",
 	Long:  `Sends a UDP request to set bulb state on with parameters`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			cobra.CheckErr(fmt.Errorf("on needs an IP address of a bulb"))
-		}
 		ip := args[0]
 		b := bulb.Bulb{
-			IP: &ip,
-			Params: &bulb.Params{
-				Dimming: &dimming,
-				Speed:   &speed,
-			},
+			IP:     &ip,
+			Params: &bulb.Params{},
 		}
-		if cmd.Flag("temp").Changed {
-			b.Params.Temp = &temp
-		}
-		if cmd.Flag("red").Changed {
-			b.Params.Red = &red
-		}
-		if cmd.Flag("green").Changed {
-			b.Params.Green = &green
-		}
-		if cmd.Flag("blue").Changed {
-			b.Params.Blue = &blue
-		}
-		if cmd.Flag("cold-white").Changed {
-			b.Params.ColdWhite = &coldWhite
-		}
-		if cmd.Flag("warm-white").Changed {
-			b.Params.WarmWhite = &warmWhite
-		}
-		if cmd.Flag("scene-id").Changed {
-			b.Params.SceneID = &sceneID
+		// Only forward flags the user actually set; the pointer-based
+		// Params struct distinguishes "unset" from a real zero value
+		// (e.g. red=0 is a valid color channel).
+		for _, f := range []struct {
+			name  string
+			field **int
+			src   *int
+		}{
+			{"temp", &b.Params.Temp, &temp},
+			{"dimming", &b.Params.Dimming, &dimming},
+			{"red", &b.Params.Red, &red},
+			{"green", &b.Params.Green, &green},
+			{"blue", &b.Params.Blue, &blue},
+			{"cold-white", &b.Params.ColdWhite, &coldWhite},
+			{"warm-white", &b.Params.WarmWhite, &warmWhite},
+			{"scene-id", &b.Params.SceneID, &sceneID},
+			{"speed", &b.Params.Speed, &speed},
+		} {
+			if cmd.Flag(f.name).Changed {
+				*f.field = f.src
+			}
 		}
 		result, err := b.SetState(timeout)
 		cobra.CheckErr(err)

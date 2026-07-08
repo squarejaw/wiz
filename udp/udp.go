@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-// The maximum "safe" UDP payload is 508 bytes.
-// This is useful for buffer sizing.
-const MAX_SAFE_PAYLOAD_SIZE = 508
+// MaxSafePayloadSize is the maximum "safe" UDP payload (508 bytes).
+// Useful for sizing read buffers.
+const MaxSafePayloadSize = 508
 
-// WiZ bulbs communicate on UDP port 38899
-const PORT = 38899
+// Port is the UDP port WiZ bulbs communicate on.
+const Port = 38899
 
 type UDPSession struct {
 	conn   net.PacketConn
@@ -19,20 +19,20 @@ type UDPSession struct {
 }
 
 func NewSession(ip string, timeout time.Duration) (*UDPSession, error) {
-	conn, err := net.ListenPacket("udp4", fmt.Sprintf(":%d", PORT))
+	conn, err := net.ListenPacket("udp4", fmt.Sprintf(":%d", Port))
 	if err != nil {
 		return nil, err
 	}
-	conn.SetReadDeadline(time.Now().Add(timeout))
-	remote, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", ip, PORT))
-	if err != nil {
+	if err := conn.SetReadDeadline(time.Now().Add(timeout)); err != nil {
+		conn.Close()
 		return nil, err
 	}
-	session := &UDPSession{
-		conn:   conn,
-		remote: remote,
+	remote, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", ip, Port))
+	if err != nil {
+		conn.Close()
+		return nil, err
 	}
-	return session, nil
+	return &UDPSession{conn: conn, remote: remote}, nil
 }
 
 func (s *UDPSession) Read(buf []byte) (int, net.Addr, error) {
@@ -40,7 +40,7 @@ func (s *UDPSession) Read(buf []byte) (int, net.Addr, error) {
 }
 
 func (s *UDPSession) Write(buf []byte) (int, error) {
-	return s.conn.WriteTo([]byte(buf), s.remote)
+	return s.conn.WriteTo(buf, s.remote)
 }
 
 func (s *UDPSession) Close() error {

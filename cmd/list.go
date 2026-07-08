@@ -28,63 +28,69 @@ var listCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		defer udpSession.Close()
 
-		err = sendRegistration(*udpSession)
+		err = sendRegistration(udpSession)
 		cobra.CheckErr(err)
 
+		bulbs, err := collectBulbs(udpSession)
+		cobra.CheckErr(err)
 		if outputJSON {
-			cobra.CheckErr(printJSON(*udpSession))
+			printJSON(bulbs)
 		} else {
-			cobra.CheckErr(printPlain(*udpSession))
+			printPlain(bulbs)
 		}
 	},
 }
 
-func sendRegistration(udpSession udp.UDPSession) error {
+func sendRegistration(udpSession *udp.UDPSession) error {
 	msg := []byte(`{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}`)
 	_, err := udpSession.Write(msg)
 	return err
 }
 
-func printJSON(udpSession udp.UDPSession) error {
-	var bulbs []bulb.Bulb
-	buf := make([]byte, udp.MAX_SAFE_PAYLOAD_SIZE)
+// packetReader is the subset of *udp.UDPSession used to read bulb responses.
+// Defining it as an interface makes the collection logic unit-testable.
+type packetReader interface {
+	Read(buf []byte) (int, net.Addr, error)
+}
+
+// collectBulbs reads registration responses until the session's read deadline
+// expires, deduplicating by MAC so a bulb that responds more than once is
+// only listed once.
+func collectBulbs(r packetReader) ([]bulb.Bulb, error) {
+	bulbs := make([]bulb.Bulb, 0)
+	seen := make(map[string]bool)
+	buf := make([]byte, udp.MaxSafePayloadSize)
 	for {
-		_, addr, err := udpSession.Read(buf)
+		_, addr, err := r.Read(buf)
 		if errors.Is(err, os.ErrDeadlineExceeded) {
-			b, err := json.Marshal(bulbs)
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(b))
-			return nil
+			return bulbs, nil
 		} else if err != nil {
-			return err
+			return bulbs, err
 		}
-		udpAddr := addr.(*net.UDPAddr)
+		udpAddr, ok := addr.(*net.UDPAddr)
+		if !ok {
+			continue
+		}
 		mac := gjson.GetBytes(buf, "result.mac").String()
-		if mac != "" {
-			ip := udpAddr.IP.String()
-			b := bulb.Bulb{IP: &ip, Mac: &mac}
-			bulbs = append(bulbs, b)
+		if mac == "" || seen[mac] {
+			continue
 		}
+		seen[mac] = true
+		ip := udpAddr.IP.String()
+		bulbs = append(bulbs, bulb.Bulb{IP: &ip, Mac: &mac})
 	}
 }
 
-func printPlain(udpSession udp.UDPSession) error {
+func printJSON(bulbs []bulb.Bulb) {
+	b, err := json.Marshal(bulbs)
+	cobra.CheckErr(err)
+	fmt.Println(string(b))
+}
+
+func printPlain(bulbs []bulb.Bulb) {
 	fmt.Printf("%-16s%s\n", "IP", "MAC")
-	buf := make([]byte, udp.MAX_SAFE_PAYLOAD_SIZE)
-	for {
-		_, addr, err := udpSession.Read(buf)
-		if errors.Is(err, os.ErrDeadlineExceeded) {
-			return nil
-		} else if err != nil {
-			return err
-		}
-		udpAddr := addr.(*net.UDPAddr)
-		mac := gjson.GetBytes(buf, "result.mac").String()
-		if mac != "" {
-			fmt.Printf("%-16s%s\n", udpAddr.IP, mac)
-		}
+	for _, b := range bulbs {
+		fmt.Printf("%-16s%s\n", *b.IP, *b.Mac)
 	}
 }
 

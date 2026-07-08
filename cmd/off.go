@@ -11,10 +11,8 @@ var offCmd = &cobra.Command{
 	Use:   "off [IP]",
 	Short: "Turn bulb off",
 	Long:  `Sends a UDP request to set bulb state off`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			cobra.CheckErr(fmt.Errorf("on needs an IP address of a bulb"))
-		}
 		ip := args[0]
 		state := false
 		b := bulb.Bulb{
@@ -25,7 +23,6 @@ var offCmd = &cobra.Command{
 		}
 		result, err := b.SetState(timeout)
 		cobra.CheckErr(err)
-		fmt.Println(result)
 		if result != "" {
 			fmt.Println(result)
 		}

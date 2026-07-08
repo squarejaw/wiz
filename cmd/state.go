@@ -15,10 +15,8 @@ var stateCmd = &cobra.Command{
 	Use:   "state",
 	Short: "Get current bulb state",
 	Long:  `Sends a UDP request to get the current state of the bulb and prints it to standard out`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			cobra.CheckErr(fmt.Errorf("on needs an IP address of a bulb"))
-		}
 		ip := args[0]
 		udpSession, err := udp.NewSession(ip, time.Duration(timeout)*time.Second)
 		cobra.CheckErr(err)
@@ -28,10 +26,10 @@ var stateCmd = &cobra.Command{
 		_, err = udpSession.Write(msg)
 		cobra.CheckErr(err)
 
-		buf := make([]byte, udp.MAX_SAFE_PAYLOAD_SIZE)
+		buf := make([]byte, udp.MaxSafePayloadSize)
 		_, _, err = udpSession.Read(buf)
 		if errors.Is(err, os.ErrDeadlineExceeded) {
-			return
+			cobra.CheckErr(fmt.Errorf("no response from bulb %s within %ds", ip, timeout))
 		}
 		cobra.CheckErr(err)
 		result := gjson.GetBytes(buf, "result")

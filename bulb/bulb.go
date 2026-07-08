@@ -3,7 +3,6 @@ package bulb
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 type Bulb struct {
 	IP     *string `json:"ip,omitempty"`
 	Mac    *string `json:"mac,omitempty"`
-	Params *Params `json:"method,omitempty"`
+	Params *Params `json:"params,omitempty"`
 }
 
 type Params struct {
@@ -57,7 +56,7 @@ func (bulb *Bulb) SetState(timeout int) (string, error) {
 		return "", err
 	}
 
-	buf := make([]byte, udp.MAX_SAFE_PAYLOAD_SIZE)
+	buf := make([]byte, udp.MaxSafePayloadSize)
 	_, _, err = udpSession.Read(buf)
 	if errors.Is(err, os.ErrDeadlineExceeded) {
 		return "", nil
@@ -69,8 +68,10 @@ func (bulb *Bulb) SetState(timeout int) (string, error) {
 	result := gjson.GetBytes(buf, "result")
 	if result.Get("success").Bool() {
 		return result.String(), nil
-	} else {
-		errorMessage := gjson.GetBytes(buf, "error.message").String()
-		return "", fmt.Errorf("%s", errorMessage)
 	}
+	errorMessage := gjson.GetBytes(buf, "error.message").String()
+	if errorMessage == "" {
+		errorMessage = "bulb returned an error"
+	}
+	return "", errors.New(errorMessage)
 }
